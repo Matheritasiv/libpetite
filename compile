@@ -6,9 +6,9 @@
 (define cflags   "-O2")
 (define ldflags  "")
 (define libs     "")
-(define objs     "core.obj reg_sym.obj")
+(define objs     "")
 (define objmain  #f)
-(define c-init   "reg_sym")
+(define c-init   #f)
 (define static   #f)
 
 (define cc       "cl")
