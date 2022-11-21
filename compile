@@ -1,43 +1,38 @@
-#!/usr/bin/env -S scheme -q --script
 (define appname  "app")
 
 (define libpath  "../libpetite")
-(define rpath    "../libpetite")
-(define cc       "gcc")
+(define cc       "cc")
 (define objcopy  "objcopy")
-(define cflags   "-fPIC -O2")
-(define ldflags  "-s -pie -Wl,-O2")
+(define cflags   "-O2")
+(define ldflags  "-s -Wl,-O2")
 (define libs     "")
 (define objs     "")
 (define objmain  #f)
 (define c-init   #f)
-(define static   #f)
 
-(define Btype    "elf64")
+(define Btype    "pe")
 (define Bendian  "")
 (define Bmarch   "i386:")
 (define Barch    "x86-64")
 (define bootfile "app.boot")
-(define src.ss (string-append appname ".ss"))
-(define src.so (string-append appname ".so"))
-(define src.o  (string-append appname ".o"))
+(define src.ss  (string-append appname ".ss"))
+(define src.so  (string-append appname ".so"))
+(define src.obj (string-append appname ".obj"))
+(define app.exe (string-append appname ".exe"))
 (define show (lambda args
   (apply printf args) (flush-output-port)))
 (define command (lambda args
   (let ([cmd (apply format args)])
     (unless (zero? (system cmd)) (error 'command (string-append "\n" cmd))))))
 
-(set! ldflags (string-append ldflags
-  " -L" libpath " -Wl,-rpath," rpath))
-(set! libs (string-append libs
-  (if static " -lm -lncurses -luuid" " -lpetite")))
-(set! objmain (string-append
-  (or objmain
+(set! ldflags (string-append ldflags " -L" libpath))
+(set! libs (string-append libs " -lucrtbase -llibpetite"))
+(or objmain
+  (set! objmain
     (if c-init (begin
-      (command "~a -c ~a -D__BOOT__=app_boot -D__INIT__=~a -I~a ~a/main.c -omain.o"
-        cc cflags c-init libpath libpath) "main.o")
-      (string-append libpath "/main.o")))
-  (if static (string-append " " libpath "/libpetite.a") "")))
+      (command "~a -c ~a -D__BOOT__=app_boot -D__INIT__=~a -I~a ~a/main.c -omain.obj"
+        cc cflags c-init libpath libpath) "main.obj")
+      (string-append libpath "/main.obj"))))
 
 (parameterize ([optimize-level 3] [debug-level 0])
   (compile-program src.ss))
@@ -46,9 +41,9 @@
 (show "~a~%" bootfile)
 (show "making object file ...... ")
 (command "~a -Ibinary -O~a-~a~a -B~a~a ~a ~a"
-  objcopy Btype Bendian Barch Bmarch Barch bootfile src.o)
-(show "~a~%" src.o)
+  objcopy Btype Bendian Barch Bmarch Barch bootfile src.obj)
+(show "~a~%" src.obj)
 (show "linking executable ...... ")
 (command "~a ~a ~a ~a ~a ~a -o ~a"
-  cc ldflags libs objmain objs src.o appname)
-(show "~a~%" appname)
+  cc ldflags libs objmain objs src.obj app.exe)
+(show "~a~%" app.exe)

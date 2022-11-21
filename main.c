@@ -14,9 +14,8 @@ extern void __INIT__(void);
 
 int main(int argc, const char *argv[])
 {
-	int ret;
 	petite_init(boot_content, boot_end - boot_content, __INIT__);
-	ret = Sscheme_start(argc, argv);
+	int ret = Sscheme_start(argc, argv);
 	petite_fini();
 	return ret;
 }
