@@ -1,11 +1,12 @@
 #include<stddef.h>
 #include"libpetite.h"
 
-#define STR0(_X)  #_X
-#define STR(_X)   STR0(_X)
-#define BOOT      STR(__BOOT__)
-extern const unsigned char boot_content[] __asm__ ("_binary_" BOOT "_start");
-extern const unsigned char boot_end[]     __asm__ ("_binary_" BOOT "_end");
+#define BOOT_CONCAT(_X, _Y) _binary_##_X##_Y
+#define boot_concat(_X, _Y) BOOT_CONCAT(_X, _Y)
+#define boot_content        boot_concat(__BOOT__, _start)
+#define boot_end            boot_concat(__BOOT__, _end)
+extern const unsigned char boot_content[];
+extern const unsigned char boot_end[];
 #ifdef __INIT__
 extern void __INIT__(void);
 #else

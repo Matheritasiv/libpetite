@@ -3,8 +3,10 @@
 #include<windows.h>
 #include"scheme.h"
 
-extern const unsigned char petite_content[] __asm__ ("_binary_petite_boot_start");
-extern const unsigned char petite_end[]     __asm__ ("_binary_petite_boot_end");
+#define petite_content _binary_petite_boot_start
+#define petite_end     _binary_petite_boot_end
+extern const unsigned char petite_content[];
+extern const unsigned char petite_end[];
 int init_state = 0;
 
 typedef struct targs {
@@ -40,7 +42,7 @@ EXPORT int petite_init(const unsigned char *boot_content, unsigned int boot_len,
 		};
 		assert(CreatePipe(&pipe_rd, &pipe_wr, NULL, 0) != 0);
 		targs.pipe_handle = pipe_wr;
-		assert((thread_boot = CreateThread(\
+		assert((thread_petite = CreateThread(\
 			NULL, 0, data_writer, &targs, 0, NULL\
 		)) != NULL);
 		assert((fd_pipe = _open_osfhandle((intptr_t)pipe_rd, _O_RDONLY)) != -1);

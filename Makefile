@@ -5,28 +5,34 @@ ENDIAN  :=
 MARCH   := i386:
 ARCH    := x86-64
 
-CC      := cc
+CL      := cl
 LINK    := link
 OBJCOPY := objcopy
 
-all: libpetite.dll petite.lib main.obj
+CFLAGS  := /O2 /MD /Zi
 
-libpetite.dll: csv$(VER).lib scheme.res wrap.obj boot.obj
+all: petite.lib libpetite.dll main.obj
+
+libpetite.dll: csv$(VER).lib scheme.res wrap_.obj boot.obj
 	$(LINK) /dll /out:$@ /machine:X64 /nologo /wholearchive:$^ rpcrt4.lib ole32.lib advapi32.lib user32.lib
 
 petite.lib: wrap_static.obj boot.obj
 	$(LINK) /lib /out:$@ /nologo $^
 
-wrap.obj: wrap.c scheme.h
-	$(CC) -c -O2 $< -o$@
+wrap_.obj: wrap.c scheme.h
+	-@del /q /f $@
+	$(CL) /nologo /c $(CFLAGS) $<
+	ren wrap.obj $@
 
 wrap_static.obj: wrap.c scheme.h
-	$(CC) -c -O2 -DSCHEME_STATIC $< -o$@
+	-@del /q /f $@
+	$(CL) /nologo /c $(CFLAGS) /DSCHEME_STATIC $<
+	ren wrap.obj $@
 
 boot.obj: petite.boot
 	$(OBJCOPY) -Ibinary -O$(TYPE)-$(ENDIAN)$(ARCH) -B$(MARCH)$(ARCH) $< $@
 
 main.obj: main.c scheme.h
-	$(CC) -c -O2 -D__BOOT__=app_boot $< -o$@
+	$(CL) /nologo /c $(CFLAGS) /D__BOOT__=app_boot $<
 
 .PHONY: all
