@@ -1,25 +1,38 @@
-TYPE	:= elf64
-ENDIAN	:= 
-MARCH	:= i386:
-ARCH	:= x86-64
+VER     := 1000
 
-all: libpetite.so libpetite.a main.o
+TYPE    := pe
+ENDIAN  := 
+MARCH   := i386:
+ARCH    := x86-64
 
-libpetite.so: scheme/*.o zlib/*.o lz4/*.o wrap.o boot.o
-	gcc -s -Wl,-O2 -shared -lm -lncurses -luuid $^ -o$@
+CL      := cl
+LINK    := link
+OBJCOPY := objcopy
 
-libpetite.a: scheme/*.o zlib/*.o lz4/*.o wrap.o boot.o
-	-rm -f $@
-	ar rc $@ $^
-	ranlib $@
+CFLAGS  := /O2 /MD /Zi
 
-wrap.o: wrap.c
-	gcc -c -fPIC -O2 $^ -o$@
+all: petite.lib libpetite.dll main.obj
 
-boot.o: petite.boot
-	objcopy -Ibinary -O$(TYPE)-$(ENDIAN)$(ARCH) -B$(MARCH)$(ARCH) $< $@
+libpetite.dll: csv$(VER).lib scheme.res wrap_.obj boot.obj
+	$(LINK) /dll /out:$@ /machine:X64 /nologo /wholearchive:$^ rpcrt4.lib ole32.lib advapi32.lib user32.lib
 
-main.o: main.c
-	gcc -c -fPIC -O2 -D__BOOT__=app_boot $^ -o$@
+petite.lib: wrap_static.obj boot.obj
+	$(LINK) /lib /out:$@ /nologo $^
+
+wrap_.obj: wrap.c scheme.h
+	-@del /q /f $@
+	$(CL) /nologo /c $(CFLAGS) $<
+	ren wrap.obj $@
+
+wrap_static.obj: wrap.c scheme.h
+	-@del /q /f $@
+	$(CL) /nologo /c $(CFLAGS) /DSCHEME_STATIC $<
+	ren wrap.obj $@
+
+boot.obj: petite.boot
+	$(OBJCOPY) -Ibinary -O$(TYPE)-$(ENDIAN)$(ARCH) -B$(MARCH)$(ARCH) $< $@
+
+main.obj: main.c scheme.h
+	$(CL) /nologo /c $(CFLAGS) /D__BOOT__=app_boot $<
 
 .PHONY: all
