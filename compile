@@ -1,7 +1,9 @@
 (define appname  "app")
 
-(define libver   "958")
+(define libver   "1030")
 (define libpath  "../libpetite")
+(define cc       "cl")
+(define ld       "link")
 (define objcopy  "objcopy")
 (define cflags   "-O2")
 (define ldflags  "")
@@ -11,8 +13,6 @@
 (define c-init   #f)
 (define static   #f)
 
-(define cc       "cl")
-(define ld       "link")
 (define Btype    "pe")
 (define Bendian  "")
 (define Bmarch   "i386:")
