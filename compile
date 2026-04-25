@@ -43,7 +43,13 @@
         cc cflags c-init libpath libpath) "main.obj")
       (string-append libpath "/main.obj"))))
 
-(parameterize ([optimize-level 3] [debug-level 0])
+(parameterize (
+    [optimize-level 3] [debug-level 0]
+    [generate-inspector-information #f]
+    [generate-procedure-source-information #f]
+    [enable-error-source-expression #f]
+    [enable-unsafe-application #t]
+    [enable-unsafe-variable-reference #t])
   (compile-program src.ss))
 (show "making boot file ........ ")
 (make-boot-file bootfile '("petite") src.so)
