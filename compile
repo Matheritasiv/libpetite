@@ -1,7 +1,7 @@
 #!/usr/bin/env -S chezscheme -q --script
 (define appname  "app")
 
-(define libver   "1030")
+(define libver   "1040")
 (define libpath  "../libpetite")
 (define cc       "cl")
 (define ld       "link")
